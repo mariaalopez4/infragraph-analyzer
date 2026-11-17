@@ -1,0 +1,66 @@
+{
+  "scenario_name": "Fintech Customer DB Compromise",
+  "version": "1.0",
+  "hosts": [
+    {
+      "id": "srv-web",
+      "name": "Public Web App",
+      "ip": "203.0.113.15",
+      "is_exposed": true
+    },
+    {
+      "id": "srv-internal",
+      "name": "Backend Payment Processor",
+      "ip": "10.0.2.40",
+      "is_exposed": false
+    },
+    {
+      "id": "srv-monitoring",
+      "name": "Internal Monitoring Host",
+      "ip": "10.0.3.10",
+      "is_exposed": false
+    }
+  ],
+  "vulnerabilities": [
+    {
+      "cve_id": "CVE-2023-38606",
+      "severity": "CRITICAL",
+      "cvss_score": 9.8,
+      "description": "Remote Code Execution in Public Web Service"
+    },
+    {
+      "cve_id": "CVE-2022-22965",
+      "severity": "HIGH",
+      "cvss_score": 8.1,
+      "description": "Spring Framework RCE on internal metrics service"
+    }
+  ],
+  "users": [
+    {
+      "username": "deploy_user",
+      "role": "DevOps",
+      "is_privileged": true
+    },
+    {
+      "username": "auditor_user",
+      "role": "Compliance",
+      "is_privileged": false
+    }
+  ],
+  "critical_assets": [
+    {
+      "id": "db-production",
+      "name": "Fintech Customer Credit Cards Database",
+      "asset_type": "DATABASE",
+      "business_impact": "CATASTROPHIC"
+    }
+  ],
+  "relationships": [
+    { "source": "srv-web", "type": "EXPOSES", "target": "CVE-2023-38606" },
+    { "source": "deploy_user", "type": "HAS_SESSION", "target": "srv-web" },
+    { "source": "deploy_user", "type": "CAN_SSH_TO", "target": "srv-internal" },
+    { "source": "srv-internal", "type": "ACCESSES", "target": "db-production" },
+    { "source": "srv-monitoring", "type": "EXPOSES", "target": "CVE-2022-22965" },
+    { "source": "auditor_user", "type": "HAS_SESSION", "target": "srv-monitoring" }
+  ]
+}
